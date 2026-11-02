@@ -1,30 +1,24 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:food_delivery/main.dart';
+import 'package:food_delivery_app/data/models.dart';
+import 'package:food_delivery_app/state/app_state.dart';
+import 'package:food_delivery_app/data/mock_data.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('formatPrice groups thousands', () {
+    expect(formatPrice(28000), '₮28,000');
+    expect(formatPrice(1234567), '₮1,234,567');
+    expect(formatPrice(0), '₮0');
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('cart totals and merging identical items', () {
+    final app = AppState();
+    app.clearCart();
+    final food = MockData.foods.first;
+    app.addToCart(food, size: 14, quantity: 1);
+    app.addToCart(food, size: 14, quantity: 2);
+    expect(app.cart.length, 1);
+    expect(app.cartCount, 3);
+    expect(app.subtotal, food.price * 3);
+    expect(app.total, app.subtotal + app.deliveryFee);
   });
 }
