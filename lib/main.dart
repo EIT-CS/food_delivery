@@ -34,7 +34,7 @@ class _FoodAppState extends State<FoodApp> {
     return AppScope(
       state: _state,
       child: MaterialApp.router(
-        title: 'Food',
+        title: 'Food delivery',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         routerConfig: appRouter,
