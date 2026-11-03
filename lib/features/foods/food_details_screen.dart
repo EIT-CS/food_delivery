@@ -49,9 +49,9 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                 icon: food.icon,
                 color: food.color,
                 width: double.infinity,
-                height: 300,
+                height: 330,
                 radius: 0,
-                iconSize: 150,
+                iconSize: 175,
               ),
               SafeArea(
                 child: Padding(
@@ -82,7 +82,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                 ),
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 22, 20, 12),
@@ -226,7 +226,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                   ),
                   const SizedBox(height: 12),
                   AppButton(
-                    label: 'САГСАНД ХИЙХ',
+                    label: 'САГСАНД НЭМЭХ',
                     onPressed: () {
                       AppScope.of(context).addToCart(
                         food,
