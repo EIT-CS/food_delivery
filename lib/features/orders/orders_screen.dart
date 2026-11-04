@@ -32,7 +32,7 @@ class OrdersScreen extends StatelessWidget {
                 indicatorColor: AppColors.orange,
                 labelStyle: TextStyle(fontWeight: FontWeight.w700),
                 tabs: [
-                  Tab(text: 'Идэвхтэй'),
+                  Tab(text: 'Идэвхтэй захиалга'),
                   Tab(text: 'Түүх'),
                 ],
               ),
