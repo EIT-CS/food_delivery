@@ -36,7 +36,7 @@ Future<void> showOfferDialog(BuildContext context) {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  '#1243CD2',
+                  '#1243CD25',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -46,7 +46,7 @@ Future<void> showOfferDialog(BuildContext context) {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Энэ купоныг ашиглаад 35% хөнгөлөлт аваарай. Хугацаа хязгаартай!',
+                  'Энэ купоныг ашиглаад 25% хөнгөлөлт аваарай. Хугацаа хязгаартай!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.85),
