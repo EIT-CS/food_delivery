@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 2),
             const Text(
-              'Өнөөдөр юу идмээр байна?',
+              'Та өнөөдөр юу захиалах вэ?',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
