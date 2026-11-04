@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,7 +8,8 @@ import '../../core/widgets/common_widgets.dart';
 import '../../core/widgets/food_image.dart';
 import '../../state/app_state.dart';
 
-/// Хувийн мэдээлэл харах (Personal Info) → "ЗАСАХ" дарвал Edit Profile.
+/// Хувийн мэдээлэл харах (Personal Info)
+/// "ЗАСАХ" товч дарвал Edit Profile рүү шилжинэ.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -16,9 +18,11 @@ class ProfileScreen extends StatelessWidget {
     final profile = AppScope.of(context).profile;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
+            // Дээд хэсэг
             PageHeader(
               title: 'Хувийн мэдээлэл',
               trailing: GestureDetector(
@@ -27,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Text(
                     'ЗАСАХ',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: AppColors.orange,
                     ),
@@ -35,14 +39,18 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 children: [
+                  // Профайлын зураг, нэр
                   Row(
                     children: [
-                      const Avatar(radius: 38),
-                      const SizedBox(width: 16),
+                      const Avatar(radius: 45),
+
+                      const SizedBox(width: 18),
+
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,14 +58,19 @@ class ProfileScreen extends StatelessWidget {
                             Text(
                               profile.name,
                               style: const TextStyle(
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
                               ),
                             ),
+
+                            const SizedBox(height: 6),
+
                             Text(
                               profile.bio,
                               style: const TextStyle(
                                 fontSize: 12,
+                                height: 1.5,
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -66,29 +79,39 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+
+                  const SizedBox(height: 28),
+
+                  // Хувийн мэдээллийн карт
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: AppColors.field,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
                       children: [
                         _InfoRow(
                           icon: Icons.person_outline,
+                          iconColor: AppColors.orange,
                           label: 'БҮТЭН НЭР',
                           value: profile.name,
                         ),
-                        const SizedBox(height: 16),
+
+                        const SizedBox(height: 22),
+
                         _InfoRow(
                           icon: Icons.mail_outline,
+                          iconColor: const Color(0xFF8B7CF6),
                           label: 'И-МЭЙЛ',
                           value: profile.email,
                         ),
-                        const SizedBox(height: 16),
+
+                        const SizedBox(height: 22),
+
                         _InfoRow(
                           icon: Icons.phone_outlined,
+                          iconColor: const Color(0xFF48B5F5),
                           label: 'УТАСНЫ ДУГААР',
                           value: profile.phone,
                         ),
@@ -105,14 +128,17 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
+// Хувийн мэдээллийн нэг мөр
 class _InfoRow extends StatelessWidget {
   const _InfoRow({
     required this.icon,
+    required this.iconColor,
     required this.label,
     required this.value,
   });
 
   final IconData icon;
+  final Color iconColor;
   final String label;
   final String value;
 
@@ -121,11 +147,17 @@ class _InfoRow extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
-          radius: 18,
+          radius: 20,
           backgroundColor: Colors.white,
-          child: Icon(icon, size: 18, color: AppColors.orange),
+          child: Icon(
+            icon,
+            size: 19,
+            color: iconColor,
+          ),
         ),
+
         const SizedBox(width: 14),
+
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,12 +171,15 @@ class _InfoRow extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 2),
+
+              const SizedBox(height: 5),
+
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
