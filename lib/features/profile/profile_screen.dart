@@ -44,7 +44,7 @@ class ProfileScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 children: [
-                  // Профайлын зураг болон нэр
+                  // Профайлын зураг, нэр
                   Row(
                     children: [
                       const Avatar(radius: 45),
