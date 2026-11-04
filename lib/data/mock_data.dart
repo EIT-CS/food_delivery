@@ -37,7 +37,7 @@ class MockData {
     ),
     Restaurant(
       id: 'r3',
-      name: 'Буфало Бургер',
+      name: 'Чизбургер',
       cuisine: 'Бургер · Фри · Ундаа',
       rating: 4.5,
       minutes: 15,
