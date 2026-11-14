@@ -121,6 +121,7 @@ class _CartRow extends StatelessWidget {
         FoodImage(
           icon: item.food.icon,
           color: item.food.color,
+          imageAsset: item.food.image,
           size: 72,
           radius: 14,
         ),

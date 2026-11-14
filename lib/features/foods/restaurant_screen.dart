@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/common_widgets.dart';
+import '../../core/widgets/favorite_button.dart';
 import '../../core/widgets/food_cards.dart';
 import '../../core/widgets/food_image.dart';
 import '../../data/mock_data.dart';
@@ -27,7 +28,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     final app = AppScope.of(context);
     final restaurant = MockData.restaurantById(widget.restaurantId);
     final all =
-        MockData.foods.where((f) => f.restaurantId == restaurant.id).toList();
+        MockData.allFoods.where((f) => f.restaurantId == restaurant.id).toList();
     final categories = [
       'Бүгд',
       ...{for (final f in all) f.category}
@@ -45,6 +46,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 FoodImage(
                   icon: restaurant.icon,
                   color: restaurant.color,
+                  imageAsset: restaurant.image,
                   width: double.infinity,
                   height: 240,
                   radius: 0,
@@ -57,6 +59,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                       children: [
                         RoundIconButton.back(context, background: Colors.white),
                         const Spacer(),
+                        FavoriteButton.restaurant(restaurant.id, size: 40),
+                        const SizedBox(width: 8),
                         RoundIconButton(
                           icon: Icons.shopping_bag_outlined,
                           background: Colors.white,
@@ -94,7 +98,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      RatingBadge(rating: restaurant.rating),
+                      RatingBadge(rating: app.ratingOfRestaurant(restaurant)),
                       const SizedBox(width: 16),
                       const Icon(
                         Icons.delivery_dining,

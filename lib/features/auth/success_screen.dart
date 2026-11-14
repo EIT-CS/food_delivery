@@ -59,7 +59,7 @@ class SuccessScreen extends StatelessWidget {
               const Spacer(),
               AppButton(
                 label: 'ЭХЛЭХ',
-                onPressed: () => context.go(Routes.home),
+                onPressed: () => context.go(Routes.taste),
               ),
             ],
           ),

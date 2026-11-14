@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// Хэрэглэгчийн амтны сонголт ("Миний амтанд тохирох хоол").
+enum Taste {
+  spicy('Халуун ногоотой', Icons.local_fire_department),
+  healthy('Эрүүл', Icons.eco),
+  cheap('Хямд', Icons.savings),
+  fast('Түргэн', Icons.bolt);
+
+  const Taste(this.label, this.icon);
+
+  final String label;
+  final IconData icon;
+}
+
 class Food {
   const Food({
     required this.id,
@@ -12,6 +25,9 @@ class Food {
     required this.icon,
     required this.color,
     required this.description,
+    this.image,
+    this.tags = const [],
+    this.meal = 'Өдөр',
   });
 
   final String id;
@@ -24,6 +40,22 @@ class Food {
   final IconData icon;
   final Color color;
   final String description;
+  final String? image;
+
+  /// Гараар тэмдэглэсэн амт (халуун ногоотой, эрүүл). Хямд/түргэн нь автоматаар.
+  final List<Taste> tags;
+
+  /// Тогоочийн хоолны цаг: Өглөө / Өдөр / Орой.
+  final String meal;
+
+  static const int cheapLimit = 24000;
+  static const int fastLimit = 15;
+
+  bool matches(Taste taste) => switch (taste) {
+        Taste.cheap => price <= cheapLimit,
+        Taste.fast => minutes <= fastLimit,
+        _ => tags.contains(taste),
+      };
 }
 
 class Restaurant {
@@ -35,6 +67,7 @@ class Restaurant {
     required this.minutes,
     required this.icon,
     required this.color,
+    this.image,
   });
 
   final String id;
@@ -44,6 +77,7 @@ class Restaurant {
   final int minutes;
   final IconData icon;
   final Color color;
+  final String? image;
 }
 
 class FoodCategory {
@@ -69,6 +103,7 @@ enum OrderStatus { ongoing, completed, cancelled }
 class Order {
   const Order({
     required this.id,
+    required this.foodId,
     required this.title,
     required this.restaurant,
     required this.itemsCount,
@@ -80,6 +115,7 @@ class Order {
   });
 
   final String id;
+  final String foodId;
   final String title;
   final String restaurant;
   final int itemsCount;
@@ -88,6 +124,29 @@ class Order {
   final OrderStatus status;
   final IconData icon;
   final Color color;
+}
+
+/// Хэрэглэгчийн хоолонд өгсөн үнэлгээ, сэтгэгдэл.
+class Review {
+  const Review({
+    required this.id,
+    required this.foodId,
+    required this.author,
+    required this.rating,
+    required this.text,
+    required this.date,
+    this.photos = 0,
+    this.mine = false,
+  });
+
+  final String id;
+  final String foodId;
+  final String author;
+  final int rating; // 1–5
+  final String text;
+  final String date;
+  final int photos; // хавсаргасан зургийн тоо
+  final bool mine;
 }
 
 class Address {

@@ -7,6 +7,7 @@ import '../../core/widgets/common_widgets.dart';
 import '../../core/widgets/food_image.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../state/app_state.dart';
 
 /// Миний захиалга: "Идэвхтэй" ба "Түүх" табтай.
 class OrdersScreen extends StatelessWidget {
@@ -172,7 +173,10 @@ class _OrderTile extends StatelessWidget {
                   if (ongoing) {
                     context.push(Routes.tracking);
                   } else {
-                    context.push(Routes.foods);
+                    // Дахин захиалах: хоолыг сагсанд нэмээд сагс руу.
+                    AppScope.of(context)
+                        .addToCart(MockData.foodById(order.foodId));
+                    context.push(Routes.cart);
                   }
                 },
               ),
@@ -183,12 +187,14 @@ class _OrderTile extends StatelessWidget {
                 label: ongoing ? 'ЦУЦЛАХ' : 'ҮНЭЛЭХ',
                 filled: false,
                 onTap: () {
+                  if (!ongoing) {
+                    context.push(Routes.writeReviewPath(order.foodId));
+                    return;
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        ongoing
-                            ? 'Захиалга ${order.id} цуцлах хүсэлт илгээгдлээ'
-                            : 'Үнэлгээ өгсөнд баярлалаа!',
+                        'Захиалга ${order.id} цуцлах хүсэлт илгээгдлээ',
                       ),
                     ),
                   );

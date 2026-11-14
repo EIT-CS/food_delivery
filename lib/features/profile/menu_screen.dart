@@ -82,7 +82,19 @@ class MenuScreen extends StatelessWidget {
                         icon: Icons.favorite_border,
                         color: Colors.pink,
                         label: 'Дуртай хоол',
-                        onTap: () => context.push(Routes.foods),
+                        onTap: () => context.push(Routes.favorites),
+                      ),
+                      _MenuItem(
+                        icon: Icons.emoji_events_outlined,
+                        color: Colors.amber,
+                        label: 'ТОП хоол, ресторан',
+                        onTap: () => context.push(Routes.topFoods),
+                      ),
+                      _MenuItem(
+                        icon: Icons.restaurant_menu,
+                        color: Colors.green,
+                        label: 'Миний амт',
+                        onTap: () => context.push(Routes.taste),
                       ),
                       _MenuItem(
                         icon: Icons.receipt_long_outlined,
@@ -110,8 +122,8 @@ class MenuScreen extends StatelessWidget {
                       _MenuItem(
                         icon: Icons.star_outline,
                         color: Colors.amber,
-                        label: 'Хэрэглэгчийн сэтгэгдэл',
-                        onTap: () => _soon(context),
+                        label: 'Миний сэтгэгдэл',
+                        onTap: () => context.push(Routes.myReviews),
                       ),
                       _MenuItem(
                         icon: Icons.settings_outlined,

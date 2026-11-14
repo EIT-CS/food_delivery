@@ -42,7 +42,30 @@ class Routes {
   static const addresses = '/addresses';
   static const addAddress = '/addresses/new';
 
+  // Шинэ онцлогууд
+  static const favorites = '/favorites';
+  static const topFoods = '/top';
+  static const taste = '/taste';
+  static const myReviews = '/reviews';
+  static const foodReviews = '/food/:id/reviews';
+  static const writeReview = '/review/:id';
+
+  // Тогооч (Chef)
+  static const chefHome = '/chef';
+  static const chefOrders = '/chef/orders';
+  static const chefFoods = '/chef/foods';
+  static const chefAddFood = '/chef/foods/new';
+  static const chefFood = '/chef/food/:id';
+  static const chefMenu = '/chef/menu';
+  static const chefWithdrawSuccess = '/chef/withdraw-success';
+  static const chefNotifications = '/chef/notifications';
+  static const chefReviews = '/chef/reviews';
+
+  static String chefFoodPath(String id) => '/chef/food/$id';
+
   static String foodPath(String id) => '/food/$id';
+  static String foodReviewsPath(String id) => '/food/$id/reviews';
+  static String writeReviewPath(String id) => '/review/$id';
   static String restaurantPath(String id) => '/restaurant/$id';
   static String foodsPath({String? category}) => category == null
       ? foods
