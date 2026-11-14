@@ -6,6 +6,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/common_widgets.dart';
+import '../../data/accounts.dart';
+import '../../state/app_state.dart';
 import 'validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -30,7 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.go(Routes.home);
+      final app = AppScope.of(context);
+      app.signIn(_email.text);
+      // Тогоочийн имэйл бол Chef тал, бусад нь хэрэглэгчийн Нүүр.
+      context.go(app.isChef ? Routes.chefHome : Routes.home);
     }
   }
 
@@ -96,6 +101,21 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 24),
               AppButton(label: 'НЭВТРЭХ', onPressed: _submit),
+              const SizedBox(height: 10),
+              // Демо: тогоочоор орох имэйлийг сануулна.
+              GestureDetector(
+                onTap: () => setState(
+                  () => _email.text = Accounts.demoChefEmail,
+                ),
+                child: const Text(
+                  'Тогоочоор нэвтрэх: ${Accounts.demoChefEmail}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

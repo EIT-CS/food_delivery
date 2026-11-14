@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:food_delivery_app/features/auth/forgot_password_screen.dart';
-import 'package:food_delivery_app/features/onboarding/onboarding_screen.dart';
-import 'package:food_delivery_app/features/tracking/tracking_details_screen.dart';
-import 'package:food_delivery_app/features/tracking/tracking_screen.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/address/add_address_screen.dart';
@@ -12,21 +8,35 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/sign_up_screen.dart';
 import '../../features/auth/success_screen.dart';
 import '../../features/auth/verification_screen.dart';
-import '../../features/cart/cart_screen.dart' hide VerificationScreen;
+import '../../features/cart/cart_screen.dart';
 import '../../features/foods/food_details_screen.dart';
 import '../../features/foods/food_list_screen.dart';
+import '../../features/chef/chef_add_food_screen.dart';
+import '../../features/chef/chef_dashboard_screen.dart';
+import '../../features/chef/chef_food_details_screen.dart';
+import '../../features/chef/chef_foods_screen.dart';
+import '../../features/chef/chef_menu_screen.dart';
+import '../../features/chef/chef_notifications_screen.dart';
+import '../../features/chef/chef_orders_screen.dart';
+import '../../features/chef/chef_reviews_screen.dart';
+import '../../features/chef/chef_withdraw_success_screen.dart';
+import '../../features/favorites/favorites_screen.dart';
 import '../../features/foods/restaurant_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/splash_screen.dart';
 import '../../features/orders/orders_screen.dart';
 import '../../features/payment/add_card_screen.dart';
-import '../../features/payment/payment_screen.dart' hide FoodListScreen;
+import '../../features/payment/payment_screen.dart';
 import '../../features/payment/payment_success_screen.dart';
 import '../../features/profile/edit_profile_screen.dart';
 import '../../features/profile/menu_screen.dart';
 import '../../features/profile/profile_screen.dart';
+import '../../features/reviews/reviews_screen.dart';
+import '../../features/reviews/write_review_screen.dart';
 import '../../features/search/search_screen.dart';
+import '../../features/taste/taste_screen.dart';
+import '../../features/top_foods/top_foods_screen.dart';
 import '../../features/tracking/delivery_call_screen.dart';
 import '../../features/tracking/delivery_chat_screen.dart';
 import '../../features/tracking/tracking_details_screen.dart';
@@ -159,6 +169,72 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: Routes.addAddress,
       builder: (context, state) => const AddAddressScreen(),
+    ),
+    GoRoute(
+      path: Routes.favorites,
+      builder: (context, state) => const FavoritesScreen(),
+    ),
+    GoRoute(
+      path: Routes.topFoods,
+      builder: (context, state) => const TopFoodsScreen(),
+    ),
+    GoRoute(
+      path: Routes.taste,
+      builder: (context, state) => const TasteScreen(),
+    ),
+    GoRoute(
+      path: Routes.myReviews,
+      builder: (context, state) => const ReviewsScreen(),
+    ),
+    GoRoute(
+      path: Routes.foodReviews,
+      builder: (context, state) =>
+          ReviewsScreen(foodId: state.pathParameters['id']),
+    ),
+    GoRoute(
+      path: Routes.writeReview,
+      builder: (context, state) =>
+          WriteReviewScreen(foodId: state.pathParameters['id']!),
+    ),
+    // ----- Тогооч (Chef) -----
+    GoRoute(
+      path: Routes.chefHome,
+      builder: (context, state) => const ChefDashboardScreen(),
+    ),
+    GoRoute(
+      path: Routes.chefOrders,
+      builder: (context, state) => const ChefOrdersScreen(),
+    ),
+    GoRoute(
+      path: Routes.chefFoods,
+      builder: (context, state) => const ChefFoodsScreen(),
+    ),
+    GoRoute(
+      path: Routes.chefAddFood,
+      builder: (context, state) => const ChefAddFoodScreen(),
+    ),
+    GoRoute(
+      path: Routes.chefFood,
+      builder: (context, state) =>
+          ChefFoodDetailsScreen(foodId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: Routes.chefMenu,
+      builder: (context, state) => const ChefMenuScreen(),
+    ),
+    GoRoute(
+      path: Routes.chefWithdrawSuccess,
+      builder: (context, state) => const ChefWithdrawSuccessScreen(),
+    ),
+    GoRoute(
+      path: Routes.chefNotifications,
+      builder: (context, state) => ChefNotificationsScreen(
+        initialTab: state.uri.queryParameters['tab'] == 'messages' ? 1 : 0,
+      ),
+    ),
+    GoRoute(
+      path: Routes.chefReviews,
+      builder: (context, state) => const ChefReviewsScreen(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

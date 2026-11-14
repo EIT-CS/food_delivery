@@ -5,8 +5,11 @@ import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/common_widgets.dart';
 import '../../core/widgets/food_cards.dart';
+import '../../core/widgets/food_image.dart';
 import '../../data/mock_data.dart';
+import '../../data/models.dart';
 import '../../state/app_state.dart';
+import '../top_foods/top_foods_screen.dart' show RankBadge;
 import 'offer_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -34,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final app = AppScope.of(context);
-    final popular = MockData.foods.take(6).toList();
+    final popular = MockData.allFoods.take(6).toList();
 
     return Scaffold(
       bottomNavigationBar: const _BottomBar(),
@@ -42,12 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           children: [
-            // Дээд мөр: хаяг + профайл
+            // Дээд мөр: профайл + хаяг + сагс
             Row(
               children: [
-                const Icon(Icons.location_on,
-                    size: 18, color: AppColors.orange),
-                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: () => context.push(Routes.menu),
+                  child: const Avatar(radius: 20),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => context.push(Routes.addresses),
@@ -63,21 +68,37 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: AppColors.textSecondary,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Row(
                           children: [
+                            const Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: AppColors.orange,
+                            ),
+                            const SizedBox(width: 3),
                             Flexible(
                               child: Text(
-                                app.currentAddress.text,
+                                app.currentAddress.label,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
                             const Icon(Icons.arrow_drop_down, size: 20),
                           ],
+                        ),
+                        Text(
+                          app.currentAddress.text,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -94,9 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Сайн байна уу, Anno!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            Text(
+              'Сайн байна уу, ${app.profile.name}!',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 2),
             const Text(
@@ -180,6 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            const _TasteSection(),
             SectionHeader(
               title: 'Алдартай хоолнууд',
               actionLabel: 'Бүгдийг харах',
@@ -196,6 +218,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     FoodCard(food: popular[i], width: 160),
               ),
             ),
+            const SizedBox(height: 24),
+            SectionHeader(
+              title: 'ТОП хоолнууд',
+              actionLabel: 'Бүгдийг харах',
+              onAction: () => context.push(Routes.topFoods),
+            ),
+            const SizedBox(height: 8),
+            for (var i = 0; i < 3; i++)
+              _TopTile(rank: i + 1, food: app.topFoods[i]),
             const SizedBox(height: 24),
             SectionHeader(
               title: 'Нээлттэй рестораанууд',
@@ -322,6 +353,162 @@ class _BarItem extends StatelessWidget {
                 color: color,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Танд тохирох хоол": амт сонгосон бол санал болгоно, үгүй бол сонгохыг урина.
+class _TasteSection extends StatelessWidget {
+  const _TasteSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final app = AppScope.of(context);
+
+    if (!app.hasTastes) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: GestureDetector(
+          onTap: () => context.push(Routes.taste),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE7F3D2),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.restaurant_menu, color: AppColors.primary),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Амтаа сонгоорой',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Танд тохирсон хоолыг санал болгоно',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: AppColors.primary),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final foods = app.recommended.take(6).toList();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(
+            title: 'Танд тохирох хоол',
+            actionLabel: 'Өөрчлөх',
+            onAction: () => context.push(Routes.taste),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            children: [
+              for (final t in app.tastes)
+                Chip(
+                  avatar: Icon(t.icon, size: 14, color: AppColors.primary),
+                  label: Text(t.label, style: const TextStyle(fontSize: 11)),
+                  visualDensity: VisualDensity.compact,
+                  backgroundColor: const Color(0xFFE7F3D2),
+                  side: BorderSide.none,
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 245,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: foods.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, i) =>
+                  FoodCard(food: foods[i], width: 160),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ТОП жагсаалтын мөр (нүүрэнд эхний 3).
+class _TopTile extends StatelessWidget {
+  const _TopTile({required this.rank, required this.food});
+
+  final int rank;
+  final Food food;
+
+  @override
+  Widget build(BuildContext context) {
+    final app = AppScope.of(context);
+    final restaurant = MockData.restaurantById(food.restaurantId);
+    return InkWell(
+      onTap: () => context.push(Routes.foodPath(food.id)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            RankBadge(rank: rank),
+            const SizedBox(width: 12),
+            FoodImage(
+              icon: food.icon,
+              color: food.color,
+              imageAsset: food.image,
+              size: 52,
+              radius: 12,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    food.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    restaurant.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            RatingBadge(rating: app.ratingOf(food)),
           ],
         ),
       ),

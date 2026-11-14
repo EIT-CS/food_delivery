@@ -41,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     final foods = q.isEmpty
         ? <Food>[]
-        : MockData.foods
+        : MockData.allFoods
             .where((f) =>
                 f.name.toLowerCase().contains(q) ||
                 f.category.toLowerCase().contains(q))
@@ -143,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       childAspectRatio: 0.72,
                       children: [
                         for (final f in (q.isEmpty
-                            ? MockData.foods.take(4).toList()
+                            ? MockData.allFoods.take(4).toList()
                             : foods))
                           FoodCard(food: f),
                       ],
@@ -174,6 +174,7 @@ class _RestaurantTile extends StatelessWidget {
             FoodImage(
               icon: restaurant.icon,
               color: restaurant.color,
+              imageAsset: restaurant.image,
               size: 56,
               radius: 12,
             ),

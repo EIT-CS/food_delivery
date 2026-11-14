@@ -9,6 +9,7 @@ import '../../core/widgets/food_image.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
 import '../../state/app_state.dart';
+import '../reviews/review_tile.dart';
 
 /// Хоолны дэлгэрэнгүй (Food Details): хэмжээ, тоо ширхэг, сагсанд нэмэх.
 class FoodDetailsScreen extends StatefulWidget {
@@ -24,7 +25,6 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
   static const _sizes = [10, 14, 16];
   int _size = 14;
   int _quantity = 1;
-  bool _favorite = false;
 
   // Хэмжээнээс хамаарсан үнийн коэффициент.
   double get _sizeFactor => switch (_size) {
@@ -35,7 +35,10 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final app = AppScope.of(context);
     final Food food = MockData.foodById(widget.foodId);
+    final reviews = app.reviewsFor(food.id);
+    final foodTastes = Taste.values.where(food.matches).toList();
     final restaurant = MockData.restaurantById(food.restaurantId);
     final unitPrice = (food.price * _sizeFactor).round();
     final showSizes = food.category == 'Пицца' || food.category == 'Бургер';
@@ -48,6 +51,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
               FoodImage(
                 icon: food.icon,
                 color: food.color,
+                imageAsset: food.image,
                 width: double.infinity,
                 height: 330,
                 radius: 0,
@@ -61,13 +65,14 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                       RoundIconButton.back(context, background: Colors.white),
                       const Spacer(),
                       RoundIconButton(
-                        icon:
-                            _favorite ? Icons.favorite : Icons.favorite_border,
+                        icon: app.isFavoriteFood(food.id)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                         background: Colors.white,
-                        iconColor: _favorite
+                        iconColor: app.isFavoriteFood(food.id)
                             ? AppColors.danger
                             : AppColors.textPrimary,
-                        onPressed: () => setState(() => _favorite = !_favorite),
+                        onPressed: () => app.toggleFavoriteFood(food.id),
                       ),
                     ],
                   ),
@@ -120,7 +125,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        RatingBadge(rating: food.rating),
+                        RatingBadge(rating: app.ratingOf(food)),
                         const SizedBox(width: 16),
                         const Icon(
                           Icons.delivery_dining,
@@ -148,6 +153,47 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                         color: AppColors.textSecondary,
                       ),
                     ),
+                    if (foodTastes.isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final t in foodTastes)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                // Хэрэглэгчийн сонгосон амт бол ногооноор тодруулна.
+                                color: app.tastes.contains(t)
+                                    ? const Color(0xFFE7F3D2)
+                                    : AppColors.field,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    t.icon,
+                                    size: 14,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    t.label,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                     if (showSizes) ...[
                       const SizedBox(height: 18),
                       Row(
@@ -192,6 +238,27 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                         ],
                       ),
                     ],
+                    const SizedBox(height: 22),
+                    SectionHeader(
+                      title: 'Сэтгэгдэл (${reviews.length})',
+                      actionLabel: 'Бүгдийг харах',
+                      onAction: () =>
+                          context.push(Routes.foodReviewsPath(food.id)),
+                    ),
+                    const SizedBox(height: 12),
+                    if (reviews.isEmpty)
+                      const Text(
+                        'Одоогоор сэтгэгдэл алга.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      )
+                    else
+                      for (final r in reviews.take(2)) ...[
+                        ReviewTile(review: r),
+                        const SizedBox(height: 16),
+                      ],
                   ],
                 ),
               ),

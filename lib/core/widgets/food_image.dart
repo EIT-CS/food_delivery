@@ -37,32 +37,38 @@ class FoodImage extends StatelessWidget {
         width: w,
         height: h,
         child: imageAsset != null
-            ? Image.asset(imageAsset!, fit: BoxFit.cover)
-            : DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.withValues(alpha: 0.55),
-                      color,
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      final base = (w ?? c.maxWidth);
-                      final bound = base.isFinite ? base : 120.0;
-                      return Icon(
-                        icon,
-                        size: iconSize ?? (bound * 0.5).clamp(20.0, 110.0),
-                        color: Colors.white.withValues(alpha: 0.92),
-                      );
-                    },
-                  ),
-                ),
-              ),
+            ? Image.asset(
+                imageAsset!,
+                fit: BoxFit.cover,
+                // Зураг олдохгүй бол алдаа гаргахгүй, икон бүхий дүрс харуулна.
+                errorBuilder: (_, __, ___) => _placeholder(w),
+              )
+            : _placeholder(w),
+      ),
+    );
+  }
+
+  Widget _placeholder(double? w) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withValues(alpha: 0.55), color],
+        ),
+      ),
+      child: Center(
+        child: LayoutBuilder(
+          builder: (context, c) {
+            final base = w ?? c.maxWidth;
+            final bound = base.isFinite ? base : 120.0;
+            return Icon(
+              icon,
+              size: iconSize ?? (bound * 0.5).clamp(20.0, 110.0),
+              color: Colors.white.withValues(alpha: 0.92),
+            );
+          },
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import '../../state/app_state.dart';
 import '../router/routes.dart';
 import '../theme/app_colors.dart';
 import 'common_widgets.dart';
+import 'favorite_button.dart';
 import 'food_image.dart';
 
 /// Хоолны жижиг карт (2 баганат grid, хэвтээ жагсаалтад).
@@ -34,11 +35,21 @@ class FoodCard extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 1.25,
-              child: FoodImage(
-                icon: food.icon,
-                color: food.color,
-                radius: 10,
-                width: double.infinity,
+              child: Stack(
+                children: [
+                  FoodImage(
+                    icon: food.icon,
+                    color: food.color,
+                    imageAsset: food.image,
+                    radius: 10,
+                    width: double.infinity,
+                  ),
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: FavoriteButton.food(food.id, size: 28),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 8),
@@ -49,14 +60,29 @@ class FoodCard extends StatelessWidget {
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 2),
-            Text(
-              restaurant.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    restaurant.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.star_rounded, size: 13, color: AppColors.star),
+                Text(
+                  AppScope.of(context).ratingOf(food).toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
             const Spacer(),
             Row(
@@ -116,12 +142,22 @@ class RestaurantCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FoodImage(
-              icon: restaurant.icon,
-              color: restaurant.color,
-              width: double.infinity,
-              height: 130,
-              radius: 0,
+            Stack(
+              children: [
+                FoodImage(
+                  icon: restaurant.icon,
+                  color: restaurant.color,
+                  imageAsset: restaurant.image,
+                  width: double.infinity,
+                  height: 130,
+                  radius: 0,
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: FavoriteButton.restaurant(restaurant.id, size: 32),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(12),
@@ -146,7 +182,10 @@ class RestaurantCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      RatingBadge(rating: restaurant.rating),
+                      RatingBadge(
+                        rating:
+                            AppScope.of(context).ratingOfRestaurant(restaurant),
+                      ),
                       const SizedBox(width: 14),
                       const Icon(
                         Icons.delivery_dining,

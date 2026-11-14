@@ -25,7 +25,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
   @override
   Widget build(BuildContext context) {
     final app = AppScope.of(context);
-    final foods = MockData.foods.where((f) {
+    final foods = MockData.allFoods.where((f) {
       final okCategory =
           widget.category == null || f.category == widget.category;
       return okCategory &&
