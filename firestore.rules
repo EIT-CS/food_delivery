@@ -1,0 +1,189 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Туслах функцүүд ----------
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Нэвтэрсэн хэрэглэгч users/{uid}.role == 'chef' эсэх
+    function isChef() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'chef';
+    }
+
+    // Нэвтэрсэн хэрэглэгч users/{uid}.role == 'courier' (хүргэгч) эсэх
+    function isCourier() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'courier';
+    }
+
+    // Тогоочийн ресторан (users/{uid}.restaurantId). Хуучин тогоочид байхгүй
+    // тул анхны Слайси Ресторан ('r1') гэж тооцно.
+    function chefRestaurantId() {
+      let u = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return ('restaurantId' in u) ? u.restaurantId : 'r1';
+    }
+
+    // Анхны (seed) ресторанууд
+    function isSeedRestaurant(id) {
+      return id in ['r1', 'r2', 'r3', 'r4'];
+    }
+
+    // ---------- Хэрэглэгчийн профайл ----------
+    // Хүн зөвхөн өөрийнхөө баримтыг уншиж, засна.
+    // Дүр (role) болон рестораны ID нэг үүссэний дараа солигдохгүй.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && request.resource.data.role in ['customer', 'chef', 'courier'];
+      allow update: if isOwner(uid)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.get('restaurantId', null)
+             == resource.data.get('restaurantId', null);
+      allow delete: if false;
+    }
+
+    // Хэрэглэгчийн хувийн тохиргоо: хаяг, дуртай, амт (зөвхөн эзэмшигч)
+    match /users/{uid}/prefs/{doc} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ---------- Сэтгэгдэл ----------
+    // Хүн бүр уншина. Нэвтэрсэн хэрэглэгч зөвхөн өөрийн нэрээр бичиж, засна.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update, delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+
+    // ---------- Хоол, ресторан ----------
+    // Хүн бүр уншина (нэвтрээгүй ч). Тогооч зөвхөн өөрийн рестораных нь
+    // хоолыг засна. Анхны өгөгдлийг (r1..r4) эхний тогооч нэг удаа үүсгэнэ.
+    match /foods/{foodId} {
+      allow read: if true;
+      allow create: if isChef()
+        && (request.resource.data.restaurantId == chefRestaurantId()
+            || isSeedRestaurant(request.resource.data.restaurantId));
+      allow update: if isChef()
+        && resource.data.restaurantId == chefRestaurantId()
+        && request.resource.data.restaurantId == resource.data.restaurantId;
+      allow delete: if isChef()
+        && resource.data.restaurantId == chefRestaurantId();
+    }
+
+    match /restaurants/{restaurantId} {
+      allow read: if true;
+      allow create: if isChef()
+        && (restaurantId == chefRestaurantId() || isSeedRestaurant(restaurantId));
+      allow update, delete: if isChef() && restaurantId == chefRestaurantId();
+    }
+
+    // ---------- Захиалга ----------
+    // Нэг баримт = нэг хоолны мөр.
+    //   Хэрэглэгч : өөрийнхөө захиалгыг үүсгэнэ, зөвхөн "new" үедээ цуцална.
+    //   Тогооч    : өөрийн рестораны захиалгыг new → preparing → ready болгоно.
+    //   Хүргэгч   : "ready" захиалгыг харж, авч (delivering), хүргээд (completed).
+    match /orders/{orderId} {
+      allow read: if signedIn()
+        && (resource.data.customerId == request.auth.uid
+            || (isChef() && resource.data.restaurantId == chefRestaurantId())
+            || (isCourier()
+                && (resource.data.status == 'ready'
+                    || resource.data.courierId == request.auth.uid)));
+
+      allow create: if signedIn()
+        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.status == 'new';
+
+      allow update: if signedIn() && (
+        // Тогооч
+        (isChef()
+          && resource.data.restaurantId == chefRestaurantId()
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status in ['preparing', 'ready', 'cancelled'])
+        // Хэрэглэгч (цуцлах)
+        || (resource.data.customerId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'updatedAt'])
+          && resource.data.status == 'new'
+          && request.resource.data.status == 'cancelled')
+        // Хүргэгч: захиалгыг авах (зөвхөн ready үед)
+        || (isCourier()
+          && resource.data.status == 'ready'
+          && request.resource.data.status == 'delivering'
+          && request.resource.data.courierId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'updatedAt', 'courierId', 'courierName', 'courierPhone']))
+        // Хүргэгч: хүргэлтийн үеийн GPS байршлаа бичих
+        || (isCourier()
+          && resource.data.courierId == request.auth.uid
+          && resource.data.status == 'delivering'
+          && request.resource.data.status == 'delivering'
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['courierLat', 'courierLng', 'locAt']))
+        // Хүргэгч: хүргэж дуусгах
+        || (isCourier()
+          && resource.data.courierId == request.auth.uid
+          && resource.data.status == 'delivering'
+          && request.resource.data.status == 'completed'
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'updatedAt']))
+      );
+
+      allow delete: if false;
+
+      // Хэрэглэгч ↔ хүргэгчийн чат: зөвхөн энэ захиалгын хоёр оролцогч.
+      match /messages/{msgId} {
+        function parentOrder() {
+          return get(/databases/$(database)/documents/orders/$(orderId)).data;
+        }
+        function isParticipant() {
+          return signedIn()
+            && (parentOrder().customerId == request.auth.uid
+                || parentOrder().get('courierId', '') == request.auth.uid);
+        }
+
+        allow read: if isParticipant();
+        allow create: if isParticipant()
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 500;
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------- Тогоочийн мөнгө таталт ----------
+    // Орлого нь захиалгаас тооцогдоно, энд зөвхөн татсан дүн хадгалагдана.
+    match /withdrawals/{withdrawalId} {
+      allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isChef()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.restaurantId == chefRestaurantId()
+        && request.resource.data.amount is int
+        && request.resource.data.amount > 0;
+      allow update, delete: if false;
+    }
+
+    // ---------- Бусад бүгд хаалттай ----------
+    // (сэтгэгдэл, дуртай хоол зэргийг дараагийн алхмуудад нэмнэ)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
